@@ -1,0 +1,185 @@
+.admin-dashboard-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.admin-navbar {
+  background-color: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-navbar-inner {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.admin-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.admin-brand-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.admin-badge-active {
+  font-size: 0.725rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.admin-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.admin-user-info {
+  display: none;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.admin-user-email {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.admin-main-content {
+  flex: 1;
+  padding-block: var(--space-8);
+}
+
+.admin-welcome-banner {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.admin-welcome-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.admin-welcome-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.admin-modules-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-text-primary);
+}
+
+.admin-modules-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+}
+
+.admin-module-card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: border-color var(--transition-fast);
+}
+
+.admin-module-card:hover {
+  border-color: var(--color-border-hover);
+}
+
+.admin-module-card.clickable {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  border-color: var(--color-border-glow);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.admin-module-card.clickable:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.2);
+}
+
+.admin-module-card.clickable .admin-module-status {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: var(--color-border-glow);
+}
+
+.admin-module-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-module-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.admin-module-status {
+  font-size: 0.725rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.admin-module-desc {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .admin-modules-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-user-info {
+    display: block;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-modules-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

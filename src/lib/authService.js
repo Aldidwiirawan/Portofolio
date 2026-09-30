@@ -41,3 +41,27 @@ export function onAuthStateChange(callback) {
   const { data: { subscription } } = supabase.auth.onAuthStateChange(callback)
   return subscription
 }
+
+/**
+ * Memvalidasi apakah user_id terdaftar pada tabel public.profiles (pemilik portfolio/admin)
+ * Mengambil hanya kolom minimum ('id') untuk efisiensi.
+ * @param {string} userId
+ * @returns {Promise<boolean>}
+ */
+export async function verifyIsAdmin(userId) {
+  if (!userId) return false
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (error || !data) {
+      return false
+    }
+    return true
+  } catch {
+    return false
+  }
+}
