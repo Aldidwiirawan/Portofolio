@@ -4,19 +4,24 @@ import './Footer.css'
 /**
  * Footer component with semantic structure, navigation, copyright,
  * and a subtle discovery entry point to admin CMS.
+ * @param {Object} props
+ * @param {Object|null} [props.profile] - Optional profile data object
  */
-function Footer() {
+function Footer({ profile = null }) {
   const currentYear = new Date().getFullYear()
+  const brandTitle = profile?.full_name || 'Aldi Dwi Irawan'
+  const brandDesc =
+    profile?.bio ||
+    profile?.tagline ||
+    'Web Developer & Software Engineer yang berfokus membangun aplikasi web modern, performan, dan mudah digunakan.'
 
   return (
     <footer className="site-footer">
       <div className="container">
         <div className="footer-top">
           <div className="footer-brand">
-            <h3 className="footer-brand-title">Aldi Dwi Irawan</h3>
-            <p className="footer-brand-desc">
-              Web Developer & Software Engineer yang berfokus membangun aplikasi web modern, performan, dan mudah digunakan.
-            </p>
+            <h3 className="footer-brand-title">{brandTitle}</h3>
+            <p className="footer-brand-desc">{brandDesc}</p>
           </div>
 
           <div className="footer-links-group">

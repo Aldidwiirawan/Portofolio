@@ -8,6 +8,11 @@ import './App.css'
 const AdminLoginPage = lazy(() => import('./pages/admin/AdminLoginPage'))
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
 const AdminProjectsPage = lazy(() => import('./pages/admin/AdminProjectsPage'))
+const AdminSkillsPage = lazy(() => import('./pages/admin/AdminSkillsPage'))
+const AdminExperiencesPage = lazy(() => import('./pages/admin/AdminExperiencesPage'))
+const AdminEducationsPage = lazy(() => import('./pages/admin/AdminEducationsPage'))
+const AdminProfilePage = lazy(() => import('./pages/admin/AdminProfilePage'))
+const AdminMessagesPage = lazy(() => import('./pages/admin/AdminMessagesPage'))
 
 function PageFallback() {
   return (
@@ -48,6 +53,56 @@ function App() {
             element={
               <AdminRoute>
                 <AdminProjectsPage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Protected Admin Skills Module Route */}
+          <Route
+            path="/admin/skills"
+            element={
+              <AdminRoute>
+                <AdminSkillsPage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Protected Admin Experiences Module Route */}
+          <Route
+            path="/admin/experiences"
+            element={
+              <AdminRoute>
+                <AdminExperiencesPage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Protected Admin Educations Module Route */}
+          <Route
+            path="/admin/educations"
+            element={
+              <AdminRoute>
+                <AdminEducationsPage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Protected Admin Profile Settings Module Route */}
+          <Route
+            path="/admin/profile"
+            element={
+              <AdminRoute>
+                <AdminProfilePage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Protected Admin Inbox Messages Module Route */}
+          <Route
+            path="/admin/messages"
+            element={
+              <AdminRoute>
+                <AdminMessagesPage />
               </AdminRoute>
             }
           />

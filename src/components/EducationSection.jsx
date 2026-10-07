@@ -25,9 +25,14 @@ function EducationSection({ educations = [] }) {
         <div className="timeline-container">
           <div className="timeline-list">
             {sortedEducations.map((edu) => {
-              const period = edu.end_date
-                ? `${edu.start_date} — ${edu.end_date}`
-                : `${edu.start_date} — Sekarang`
+              const startDisplay = edu.start_year || edu.start_date
+              const endDisplay = edu.end_year || edu.end_date
+
+              const period = edu.is_current
+                ? `${startDisplay} — Sekarang`
+                : endDisplay
+                ? `${startDisplay} — ${endDisplay}`
+                : `${startDisplay}`
 
               return (
                 <TimelineItem

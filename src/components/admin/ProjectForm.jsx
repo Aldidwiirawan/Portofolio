@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../../lib/supabaseClient'
+import { extractStoragePath } from '../../lib/storageUtils'
 import './ProjectForm.css'
 
 /**
@@ -44,25 +45,34 @@ function formatFileSize(bytes) {
 
 /**
  * ProjectForm Component
- * Handles input validation, storage image upload, and explicit INSERT into public.projects table.
+ * Handles input validation, storage image upload, and explicit INSERT or UPDATE into public.projects table.
+ * Supports both CREATE and UPDATE modes seamlessly.
  *
  * @param {Object} props
- * @param {(newProject: Object) => void} props.onSuccess - Callback on successful insert
+ * @param {Object|null} [props.project] - Existing project data if editing, or null if creating
+ * @param {(savedProject: Object) => void} props.onSuccess - Callback on successful insert or update
  * @param {() => void} props.onCancel - Callback on cancel button click
  */
-function ProjectForm({ onSuccess, onCancel }) {
-  const [title, setTitle] = useState('')
-  const [slug, setSlug] = useState('')
-  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false)
-  const [description, setDescription] = useState('')
-  const [content, setContent] = useState('')
-  const [demoUrl, setDemoUrl] = useState('')
-  const [githubUrl, setGithubUrl] = useState('')
-  const [techStackInput, setTechStackInput] = useState('')
-  const [isFeatured, setIsFeatured] = useState(false)
-  const [sortOrder, setSortOrder] = useState('0')
+function ProjectForm({ project = null, onSuccess, onCancel }) {
+  const isEditMode = Boolean(project?.id)
 
-  // Thumbnail file and preview state
+  const [title, setTitle] = useState(project?.title || '')
+  const [slug, setSlug] = useState(project?.slug || '')
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(isEditMode)
+  const [description, setDescription] = useState(project?.description || '')
+  const [content, setContent] = useState(project?.content || '')
+  const [demoUrl, setDemoUrl] = useState(project?.demo_url || '')
+  const [githubUrl, setGithubUrl] = useState(project?.github_url || '')
+  const [techStackInput, setTechStackInput] = useState(
+    Array.isArray(project?.tech_stack) ? project.tech_stack.join(', ') : ''
+  )
+  const [isFeatured, setIsFeatured] = useState(Boolean(project?.is_featured))
+  const [sortOrder, setSortOrder] = useState(String(project?.sort_order ?? 0))
+
+  // Existing thumbnail URL from database (if in edit mode)
+  const existingThumbnailUrl = project?.thumbnail_url || null
+
+  // New thumbnail file and preview state
   const [thumbnailFile, setThumbnailFile] = useState(null)
   const [thumbnailPreview, setThumbnailPreview] = useState(null)
   const fileInputRef = useRef(null)
@@ -111,7 +121,7 @@ function ProjectForm({ onSuccess, onCancel }) {
     if (!file.type.startsWith('image/')) {
       setFieldErrors((prev) => ({
         ...prev,
-        thumbnail: 'File yang dipilih harus berupa file gambar (image/*).',
+        thumbnail: 'File harus berupa gambar.',
       }))
       return
     }
@@ -120,7 +130,7 @@ function ProjectForm({ onSuccess, onCancel }) {
     if (file.size > 2097152) {
       setFieldErrors((prev) => ({
         ...prev,
-        thumbnail: 'Ukuran file gambar tidak boleh melebihi 2 MB.',
+        thumbnail: 'Ukuran gambar maksimal 2 MB.',
       }))
       return
     }
@@ -137,7 +147,7 @@ function ProjectForm({ onSuccess, onCancel }) {
     setThumbnailPreview(URL.createObjectURL(file))
   }
 
-  // Remove selected thumbnail image
+  // Remove selected new thumbnail image (reverts to existing thumbnail in edit mode)
   const handleRemoveThumbnail = () => {
     if (thumbnailPreview) {
       URL.revokeObjectURL(thumbnailPreview)
@@ -183,7 +193,7 @@ function ProjectForm({ onSuccess, onCancel }) {
 
     // Thumbnail size re-check if selected
     if (thumbnailFile && thumbnailFile.size > 2097152) {
-      errors.thumbnail = 'Ukuran file gambar tidak boleh melebihi 2 MB.'
+      errors.thumbnail = 'Ukuran gambar maksimal 2 MB.'
     }
 
     // Sort order validation
@@ -207,9 +217,9 @@ function ProjectForm({ onSuccess, onCancel }) {
     setIsSubmitting(true)
 
     let uploadedFilePath = null
-    let publicThumbnailUrl = null
+    let finalThumbnailUrl = isEditMode ? existingThumbnailUrl : null
 
-    // 1. Upload thumbnail to Supabase Storage if file is chosen
+    // 1. Upload thumbnail to Supabase Storage if user chose a new file
     if (thumbnailFile) {
       const fileExt = thumbnailFile.name.split('.').pop().toLowerCase() || 'png'
       const filePath = `projects/${crypto.randomUUID()}.${fileExt}`
@@ -235,7 +245,7 @@ function ProjectForm({ onSuccess, onCancel }) {
           .from('portfolio-assets')
           .getPublicUrl(uploadedFilePath)
 
-        publicThumbnailUrl = urlData?.publicUrl || null
+        finalThumbnailUrl = urlData?.publicUrl || null
       } catch (err) {
         setGeneralError(
           err instanceof Error
@@ -259,7 +269,7 @@ function ProjectForm({ onSuccess, onCancel }) {
       slug: slug.trim(),
       description: description.trim(),
       content: content.trim() ? content.trim() : null,
-      thumbnail_url: publicThumbnailUrl,
+      thumbnail_url: finalThumbnailUrl,
       demo_url: demoUrl.trim() ? demoUrl.trim() : null,
       github_url: githubUrl.trim() ? githubUrl.trim() : null,
       tech_stack: techStackArray,
@@ -267,18 +277,20 @@ function ProjectForm({ onSuccess, onCancel }) {
       sort_order: parseInt(sortOrder, 10) || 0,
     }
 
-    // 4. Insert into public.projects table
+    // 4. Execute database mutation (UPDATE or INSERT)
     try {
-      const { data, error: insertError } = await supabase
-        .from('projects')
-        .insert(payload)
+      const query = isEditMode
+        ? supabase.from('projects').update(payload).eq('id', project.id)
+        : supabase.from('projects').insert(payload)
+
+      const { data, error: dbError } = await query
         .select(
           'id, title, slug, description, content, thumbnail_url, demo_url, github_url, tech_stack, is_featured, sort_order, created_at, updated_at'
         )
         .single()
 
-      if (insertError) {
-        // Orphan file cleanup: remove uploaded file if DB insert fails
+      if (dbError) {
+        // Orphan file cleanup: remove newly uploaded file if DB operation fails
         let cleanupWarning = ''
         if (uploadedFilePath) {
           try {
@@ -304,9 +316,9 @@ function ProjectForm({ onSuccess, onCancel }) {
 
         // Handle unique constraint duplicate slug error (PostgreSQL error code 23505)
         if (
-          insertError.code === '23505' ||
-          insertError.message?.toLowerCase().includes('slug') ||
-          insertError.message?.toLowerCase().includes('duplicate')
+          dbError.code === '23505' ||
+          dbError.message?.toLowerCase().includes('slug') ||
+          dbError.message?.toLowerCase().includes('duplicate')
         ) {
           setGeneralError(
             `Slug sudah digunakan. Silakan gunakan slug yang berbeda.${cleanupWarning}`
@@ -317,11 +329,35 @@ function ProjectForm({ onSuccess, onCancel }) {
           }))
         } else {
           setGeneralError(
-            `${insertError.message || 'Gagal menyimpan project ke database.'}${cleanupWarning}`
+            `${dbError.message || (isEditMode ? 'Gagal memperbarui project.' : 'Gagal menyimpan project ke database.')}${cleanupWarning}`
           )
         }
         setIsSubmitting(false)
         return
+      }
+
+      // 5. Best-effort cleanup of old thumbnail if replaced in edit mode
+      if (isEditMode && uploadedFilePath && existingThumbnailUrl) {
+        const oldFilePath = extractStoragePath(existingThumbnailUrl)
+        if (oldFilePath && oldFilePath !== uploadedFilePath) {
+          try {
+            const { error: oldRemoveError } = await supabase.storage
+              .from('portfolio-assets')
+              .remove([oldFilePath])
+
+            if (oldRemoveError) {
+              console.warn(
+                `[Storage Cleanup] Gagal menghapus thumbnail lama '${oldFilePath}':`,
+                oldRemoveError.message
+              )
+            }
+          } catch (ex) {
+            console.warn(
+              `[Storage Cleanup] Exception saat menghapus thumbnail lama:`,
+              ex
+            )
+          }
+        }
       }
 
       // Success
@@ -367,9 +403,13 @@ function ProjectForm({ onSuccess, onCancel }) {
     <div className="admin-project-form-card">
       <div className="project-form-header">
         <div>
-          <h3 className="project-form-title">Tambah Project Baru</h3>
+          <h3 className="project-form-title">
+            {isEditMode ? 'Edit Project' : 'Tambah Project Baru'}
+          </h3>
           <p className="project-form-subtitle">
-            Masukkan informasi detail portofolio untuk disimpan ke tabel <code>public.projects</code>.
+            {isEditMode
+              ? 'Perbarui informasi portofolio untuk disimpan ke tabel public.projects.'
+              : 'Masukkan informasi detail portofolio untuk disimpan ke tabel public.projects.'}
           </p>
         </div>
       </div>
@@ -423,7 +463,9 @@ function ProjectForm({ onSuccess, onCancel }) {
               <p className="form-field-error">{fieldErrors.slug}</p>
             ) : (
               <p className="form-field-helper">
-                Otomatis dibuat dari judul. Hanya huruf kecil, angka, dan tanda hubung (-).
+                {isEditMode
+                  ? 'Slug digunakan sebagai identifier unik project pada URL.'
+                  : 'Otomatis dibuat dari judul. Hanya huruf kecil, angka, dan tanda hubung (-).'}
               </p>
             )}
           </div>
@@ -531,7 +573,67 @@ function ProjectForm({ onSuccess, onCancel }) {
               disabled={isSubmitting}
             />
             <div className="thumbnail-upload-container">
-              {!thumbnailPreview ? (
+              {thumbnailPreview ? (
+                // Skenario 1: User telah memilih file gambar baru
+                <div className="thumbnail-preview-card">
+                  <img
+                    src={thumbnailPreview}
+                    alt="Preview thumbnail baru"
+                    className="thumbnail-preview-image"
+                  />
+                  <div className="thumbnail-preview-meta">
+                    <div className="thumbnail-preview-header">
+                      <span className="thumbnail-preview-name" title={thumbnailFile?.name}>
+                        {thumbnailFile?.name}
+                      </span>
+                      {isEditMode && (
+                        <span className="thumbnail-badge thumbnail-badge-new">
+                          Baru (Belum Disimpan)
+                        </span>
+                      )}
+                    </div>
+                    <span className="thumbnail-preview-size">
+                      {thumbnailFile ? formatFileSize(thumbnailFile.size) : ''}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="thumbnail-remove-btn"
+                    onClick={handleRemoveThumbnail}
+                    disabled={isSubmitting}
+                    title={isEditMode && existingThumbnailUrl ? 'Batal memilih file baru' : 'Hapus pilihan gambar'}
+                  >
+                    {isEditMode && existingThumbnailUrl ? 'Batal' : 'Hapus'}
+                  </button>
+                </div>
+              ) : isEditMode && existingThumbnailUrl ? (
+                // Skenario 2: Mode edit dengan thumbnail lama yang sudah tersimpan
+                <div className="thumbnail-preview-card">
+                  <img
+                    src={existingThumbnailUrl}
+                    alt="Thumbnail tersimpan saat ini"
+                    className="thumbnail-preview-image"
+                  />
+                  <div className="thumbnail-preview-meta">
+                    <div className="thumbnail-preview-header">
+                      <span className="thumbnail-preview-name">Thumbnail Saat Ini</span>
+                      <span className="thumbnail-badge thumbnail-badge-saved">Tersimpan</span>
+                    </div>
+                    <span className="thumbnail-preview-size">
+                      Thumbnail lama tetap digunakan kecuali Anda memilih file baru.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm thumbnail-change-btn"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isSubmitting}
+                  >
+                    Ganti Gambar
+                  </button>
+                </div>
+              ) : (
+                // Skenario 3: Belum ada file dipilih dan belum ada thumbnail tersimpan
                 <div
                   role="button"
                   tabIndex={0}
@@ -556,37 +658,15 @@ function ProjectForm({ onSuccess, onCancel }) {
                     Format yang didukung: PNG, JPG, WebP, SVG (Maks. 2 MB)
                   </span>
                 </div>
-              ) : (
-                <div className="thumbnail-preview-card">
-                  <img
-                    src={thumbnailPreview}
-                    alt="Preview thumbnail"
-                    className="thumbnail-preview-image"
-                  />
-                  <div className="thumbnail-preview-meta">
-                    <span className="thumbnail-preview-name" title={thumbnailFile?.name}>
-                      {thumbnailFile?.name}
-                    </span>
-                    <span className="thumbnail-preview-size">
-                      {thumbnailFile ? formatFileSize(thumbnailFile.size) : ''}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className="thumbnail-remove-btn"
-                    onClick={handleRemoveThumbnail}
-                    disabled={isSubmitting}
-                  >
-                    Hapus
-                  </button>
-                </div>
               )}
             </div>
             {fieldErrors.thumbnail ? (
               <p className="form-field-error">{fieldErrors.thumbnail}</p>
             ) : (
               <p className="form-field-helper">
-                File akan otomatis diunggah ke folder <code>projects/</code> pada Supabase Storage dan public URL-nya disimpan ke database.
+                {isEditMode
+                  ? 'Jika memilih gambar baru, thumbnail lama akan diganti setelah perubahan disimpan.'
+                  : 'File akan otomatis diunggah ke folder projects/ pada Supabase Storage dan public URL-nya disimpan ke database.'}
               </p>
             )}
           </div>
@@ -668,7 +748,13 @@ function ProjectForm({ onSuccess, onCancel }) {
             className="btn btn-primary"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Menyimpan...' : 'Simpan Project'}
+            {isSubmitting
+              ? isEditMode
+                ? 'Menyimpan Perubahan...'
+                : 'Menyimpan...'
+              : isEditMode
+              ? 'Simpan Perubahan'
+              : 'Simpan Project'}
           </button>
         </div>
       </form>

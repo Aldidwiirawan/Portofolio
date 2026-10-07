@@ -135,16 +135,24 @@ function AdminDashboardPage() {
           <h3 className="admin-modules-title">Modul Pengelolaan Konten</h3>
           <div className="admin-modules-grid">
             {cmsModules.map((module) => {
-              const isProjects = module.name === 'Projects'
+              const routeMap = {
+                Profile: '/admin/profile',
+                Projects: '/admin/projects',
+                Skills: '/admin/skills',
+                Experiences: '/admin/experiences',
+                Educations: '/admin/educations',
+                Messages: '/admin/messages',
+              }
+              const targetPath = routeMap[module.name]
 
-              if (isProjects) {
+              if (targetPath) {
                 return (
                   <Link
                     key={module.name}
-                    to="/admin/projects"
+                    to={targetPath}
                     className="admin-module-card clickable"
-                    title="Buka Manajemen Projects"
-                    aria-label="Buka Manajemen Projects"
+                    title={`Buka Manajemen ${module.name}`}
+                    aria-label={`Buka Manajemen ${module.name}`}
                   >
                     <div className="admin-module-header">
                       <h4 className="admin-module-name">{module.name}</h4>

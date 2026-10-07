@@ -1,36 +1,142 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { supabase } from '../../lib/supabaseClient'
+import { extractStoragePath } from '../../lib/storageUtils'
 import { useProjects } from '../../hooks/useProjects'
 import TechBadge from '../../components/TechBadge'
 import ProjectForm from '../../components/admin/ProjectForm'
 import './AdminProjectsPage.css'
 
 /**
- * AdminProjectsPage Component (READ + CREATE)
+ * AdminProjectsPage Component (READ, CREATE, UPDATE, DELETE)
  * Provides comprehensive portfolio project management for owner/admin:
  * 1. Fetches projects from public.projects via Supabase client.
- * 2. Allows inserting new projects via controlled ProjectForm with validation.
+ * 2. Allows inserting and updating projects via controlled ProjectForm with validation.
+ * 3. Supports safe deletion of projects with custom confirmation modal and thumbnail cleanup.
  */
 function AdminProjectsPage() {
   const { projects, isLoading, error, refetch } = useProjects()
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingProject, setEditingProject] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
+  const [deletingProject, setDeletingProject] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState(null)
 
   const featuredCount = projects.filter((p) => p.is_featured).length
 
-  const handleCreateSuccess = (newProject) => {
+  // Keyboard accessibility: Close delete modal on Escape key press
+  useEffect(() => {
+    if (!deletingProject) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !isDeleting) {
+        setDeletingProject(null)
+        setDeleteError(null)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [deletingProject, isDeleting])
+
+  const handleFormSuccess = (savedProject) => {
+    const isEdit = Boolean(editingProject)
     setIsFormOpen(false)
-    setSuccessMessage(`Project "${newProject.title}" berhasil ditambahkan!`)
+    setEditingProject(null)
+    setSuccessMessage(
+      isEdit
+        ? `Project "${savedProject.title}" berhasil diperbarui!`
+        : `Project "${savedProject.title}" berhasil ditambahkan!`
+    )
     refetch()
   }
 
-  const handleOpenForm = () => {
+  const handleOpenCreateForm = () => {
+    setEditingProject(null)
     setSuccessMessage(null)
     setIsFormOpen(true)
   }
 
+  const handleOpenEditForm = (project) => {
+    setEditingProject(project)
+    setSuccessMessage(null)
+    setIsFormOpen(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const handleCancelForm = () => {
     setIsFormOpen(false)
+    setEditingProject(null)
+  }
+
+  const handleOpenDeleteModal = (project) => {
+    setDeletingProject(project)
+    setDeleteError(null)
+  }
+
+  const handleCloseDeleteModal = () => {
+    if (isDeleting) return
+    setDeletingProject(null)
+    setDeleteError(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!deletingProject) return
+
+    setIsDeleting(true)
+    setDeleteError(null)
+
+    try {
+      // 1. Delete project from public.projects
+      const { error: dbDeleteError } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', deletingProject.id)
+
+      if (dbDeleteError) {
+        throw new Error(dbDeleteError.message || 'Gagal menghapus project dari database.')
+      }
+
+      // 2. Best-effort storage cleanup of thumbnail if exists
+      if (deletingProject.thumbnail_url) {
+        const storagePath = extractStoragePath(deletingProject.thumbnail_url)
+        if (storagePath) {
+          try {
+            const { error: storageDeleteError } = await supabase.storage
+              .from('portfolio-assets')
+              .remove([storagePath])
+
+            if (storageDeleteError) {
+              console.warn(
+                `[Storage Cleanup] Gagal menghapus thumbnail '${storagePath}':`,
+                storageDeleteError.message
+              )
+            }
+          } catch (storageEx) {
+            console.warn(
+              `[Storage Cleanup] Exception saat menghapus thumbnail '${storagePath}':`,
+              storageEx
+            )
+          }
+        }
+      }
+
+      // 3. Close edit form if current deleted project was being edited
+      if (editingProject?.id === deletingProject.id) {
+        setEditingProject(null)
+        setIsFormOpen(false)
+      }
+
+      const deletedTitle = deletingProject.title
+      setDeletingProject(null)
+      setSuccessMessage(`Project "${deletedTitle}" berhasil dihapus!`)
+      refetch()
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus project.'
+      )
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   return (
@@ -78,7 +184,7 @@ function AdminProjectsPage() {
                 <button
                   type="button"
                   className="btn btn-primary btn-sm"
-                  onClick={handleOpenForm}
+                  onClick={handleOpenCreateForm}
                 >
                   + Tambah Project
                 </button>
@@ -101,10 +207,12 @@ function AdminProjectsPage() {
             </div>
           )}
 
-          {/* Form Create Project Section (Conditional) */}
+          {/* Form Create / Edit Project Section (Conditional) */}
           {isFormOpen && (
             <ProjectForm
-              onSuccess={handleCreateSuccess}
+              key={editingProject?.id || 'new-project'}
+              project={editingProject}
+              onSuccess={handleFormSuccess}
               onCancel={handleCancelForm}
             />
           )}
@@ -277,15 +385,35 @@ function AdminProjectsPage() {
                         )}
                       </div>
 
-                      {project.created_at && (
-                        <span className="admin-project-meta-date">
-                          {new Date(project.created_at).toLocaleDateString('id-ID', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </span>
-                      )}
+                      <div className="admin-project-footer-actions">
+                        <button
+                          type="button"
+                          className="btn btn-outline btn-sm admin-project-edit-btn"
+                          onClick={() => handleOpenEditForm(project)}
+                          title={`Edit project "${project.title}"`}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          className="btn btn-outline btn-sm admin-project-delete-btn"
+                          onClick={() => handleOpenDeleteModal(project)}
+                          title={`Hapus project "${project.title}"`}
+                        >
+                          Hapus
+                        </button>
+
+                        {project.created_at && (
+                          <span className="admin-project-meta-date">
+                            {new Date(project.created_at).toLocaleDateString('id-ID', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </article>
                 )
@@ -294,6 +422,88 @@ function AdminProjectsPage() {
           )}
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {deletingProject && (
+        <div
+          className="admin-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleCloseDeleteModal()
+          }}
+        >
+          <div className="admin-modal-dialog">
+            <div className="admin-modal-header">
+              <div className="admin-modal-icon-warning" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 id="delete-modal-title" className="admin-modal-title">
+                  Hapus Project
+                </h3>
+                <p className="admin-modal-subtitle">
+                  Tindakan ini permanen dan tidak dapat dibatalkan.
+                </p>
+              </div>
+            </div>
+
+            <div className="admin-modal-body">
+              <p>
+                Apakah Anda yakin ingin menghapus project{' '}
+                <strong>"{deletingProject.title}"</strong>?
+              </p>
+              <p className="admin-modal-body-subtext">
+                Record di tabel <code>public.projects</code> serta aset thumbnail terkait akan
+                dihapus secara permanen.
+              </p>
+
+              {deleteError && (
+                <div className="admin-modal-error-alert" role="alert">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <span>{deleteError}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="admin-modal-footer">
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                onClick={handleCloseDeleteModal}
+                disabled={isDeleting}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger btn-sm admin-modal-confirm-btn"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Menghapus...' : 'Ya, Hapus Project'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
