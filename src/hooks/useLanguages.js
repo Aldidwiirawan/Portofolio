@@ -2,19 +2,18 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
 /**
- * Custom Hook: useExperiences
- * Provides read access for public.experiences table.
- * Encapsulates data fetching, loading state, error handling, and refetch capabilities.
+ * Custom Hook: useLanguages
+ * Provides read access for public.languages table.
  *
  * @returns {{
- *   experiences: Array<Object>,
+ *   languages: Array<Object>,
  *   isLoading: boolean,
  *   error: string | null,
  *   refetch: () => void
  * }}
  */
-export function useExperiences() {
-  const [experiences, setExperiences] = useState([])
+export function useLanguages() {
+  const [languages, setLanguages] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
@@ -28,31 +27,28 @@ export function useExperiences() {
   useEffect(() => {
     let isMounted = true
 
-    async function loadExperiences() {
+    async function loadLanguages() {
       try {
         const { data, error: queryError } = await supabase
-          .from('experiences')
-          .select(
-            'id, company, role, location, start_date, end_date, is_current, description, sort_order, experience_type, created_at'
-          )
-          .order('sort_order', { ascending: true, nullsFirst: false })
-          .order('start_date', { ascending: false })
+          .from('languages')
+          .select('id, language_name, proficiency_level, created_at')
+          .order('created_at', { ascending: true })
 
         if (!isMounted) return
 
         if (queryError) {
-          throw new Error(queryError.message || 'Gagal memuat data experiences dari database.')
+          throw new Error(queryError.message || 'Gagal memuat data bahasa dari database.')
         }
 
-        setExperiences(data ?? [])
+        setLanguages(data ?? [])
       } catch (err) {
         if (isMounted) {
           setError(
             err instanceof Error
               ? err.message
-              : 'Terjadi kesalahan sistem saat mengambil data experiences.'
+              : 'Terjadi kesalahan sistem saat mengambil data bahasa.'
           )
-          setExperiences([])
+          setLanguages([])
         }
       } finally {
         if (isMounted) {
@@ -61,7 +57,7 @@ export function useExperiences() {
       }
     }
 
-    loadExperiences()
+    loadLanguages()
 
     return () => {
       isMounted = false
@@ -69,7 +65,7 @@ export function useExperiences() {
   }, [reloadKey])
 
   return {
-    experiences,
+    languages,
     isLoading,
     error,
     refetch,

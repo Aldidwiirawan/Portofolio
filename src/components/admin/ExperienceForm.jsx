@@ -17,6 +17,7 @@ function ExperienceForm({ experience = null, onSuccess, onCancel }) {
   const [formData, setFormData] = useState({
     role: experience?.role || '',
     company: experience?.company || '',
+    experience_type: experience?.experience_type || 'Kerja',
     location: experience?.location || '',
     start_date: experience?.start_date ? experience.start_date.split('T')[0] : '',
     end_date: experience?.end_date ? experience.end_date.split('T')[0] : '',
@@ -48,6 +49,10 @@ function ExperienceForm({ experience = null, onSuccess, onCancel }) {
     if (generalError) {
       setGeneralError(null)
     }
+  }
+
+  const handleTypeSelect = (type) => {
+    setFormData((prev) => ({ ...prev, experience_type: type }))
   }
 
   const validate = () => {
@@ -97,6 +102,7 @@ function ExperienceForm({ experience = null, onSuccess, onCancel }) {
     const payload = {
       role: formData.role.trim(),
       company: formData.company.trim(),
+      experience_type: formData.experience_type || 'Kerja',
       location: formData.location.trim() || null,
       start_date: formData.start_date,
       end_date: formData.is_current ? null : formData.end_date || null,
@@ -176,6 +182,33 @@ function ExperienceForm({ experience = null, onSuccess, onCancel }) {
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="exp-form-grid">
+          {/* Experience Type (Kerja, Magang, PKL) */}
+          <div className="form-group exp-form-grid-full">
+            <label className="form-label">
+              <span>Jenis Pengalaman</span>
+              <span className="required-indicator">*</span>
+            </label>
+            <div className="exp-type-pills" role="radiogroup" aria-label="Pilih jenis pengalaman">
+              {['Kerja', 'Magang', 'PKL'].map((type) => {
+                const isSelected = formData.experience_type === type
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    className={`exp-type-pill ${isSelected ? 'active' : ''}`}
+                    onClick={() => handleTypeSelect(type)}
+                    disabled={isSubmitting}
+                  >
+                    {type}
+                  </button>
+                )
+              })}
+            </div>
+            <p className="form-field-helper">Pilih jenis pengalaman: Kerja profesional, Magang, atau PKL.</p>
+          </div>
+
           {/* Role / Position */}
           <div className="form-group">
             <label htmlFor="exp-role" className="form-label">

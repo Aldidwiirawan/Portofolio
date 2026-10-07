@@ -52,6 +52,7 @@ function ExperienceSection({ experiences = [] }) {
                   period={period}
                   location={exp.location}
                   description={exp.description}
+                  tag={exp.experience_type}
                 />
               )
             })}

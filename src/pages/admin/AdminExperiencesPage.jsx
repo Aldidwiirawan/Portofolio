@@ -314,6 +314,9 @@ function AdminExperiencesPage() {
                       </div>
 
                       <div className="admin-exp-meta-badges">
+                        <span className="badge badge-primary">
+                          {exp.experience_type || 'Kerja'}
+                        </span>
                         <span className="admin-exp-period-badge">{periodText}</span>
                         {exp.is_current && (
                           <span className="admin-exp-current-badge">Aktif</span>

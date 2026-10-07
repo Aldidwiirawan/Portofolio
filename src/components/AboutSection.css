@@ -62,6 +62,62 @@
   margin: 0;
 }
 
+.about-resume-box {
+  margin-top: var(--space-2);
+}
+
+.about-resume-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+}
+
+.about-hobbies-section,
+.about-languages-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.about-sub-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.about-pills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.about-hobby-pill {
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.about-lang-pill {
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-light);
+  border: 1px solid var(--color-border-glow);
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+}
+
+.about-lang-pill strong {
+  color: var(--color-primary);
+}
+
 @media (min-width: 640px) {
   .about-cards-grid {
     grid-template-columns: repeat(2, 1fr);

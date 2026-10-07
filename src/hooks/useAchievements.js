@@ -2,19 +2,18 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
 /**
- * Custom Hook: useExperiences
- * Provides read access for public.experiences table.
- * Encapsulates data fetching, loading state, error handling, and refetch capabilities.
+ * Custom Hook: useAchievements
+ * Provides read access for public.achievements table.
  *
  * @returns {{
- *   experiences: Array<Object>,
+ *   achievements: Array<Object>,
  *   isLoading: boolean,
  *   error: string | null,
  *   refetch: () => void
  * }}
  */
-export function useExperiences() {
-  const [experiences, setExperiences] = useState([])
+export function useAchievements() {
+  const [achievements, setAchievements] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
@@ -28,31 +27,29 @@ export function useExperiences() {
   useEffect(() => {
     let isMounted = true
 
-    async function loadExperiences() {
+    async function loadAchievements() {
       try {
         const { data, error: queryError } = await supabase
-          .from('experiences')
-          .select(
-            'id, company, role, location, start_date, end_date, is_current, description, sort_order, experience_type, created_at'
-          )
-          .order('sort_order', { ascending: true, nullsFirst: false })
-          .order('start_date', { ascending: false })
+          .from('achievements')
+          .select('id, title, event_name, year, description, created_at')
+          .order('year', { ascending: false })
+          .order('created_at', { ascending: false })
 
         if (!isMounted) return
 
         if (queryError) {
-          throw new Error(queryError.message || 'Gagal memuat data experiences dari database.')
+          throw new Error(queryError.message || 'Gagal memuat data pencapaian dari database.')
         }
 
-        setExperiences(data ?? [])
+        setAchievements(data ?? [])
       } catch (err) {
         if (isMounted) {
           setError(
             err instanceof Error
               ? err.message
-              : 'Terjadi kesalahan sistem saat mengambil data experiences.'
+              : 'Terjadi kesalahan sistem saat mengambil data pencapaian.'
           )
-          setExperiences([])
+          setAchievements([])
         }
       } finally {
         if (isMounted) {
@@ -61,7 +58,7 @@ export function useExperiences() {
       }
     }
 
-    loadExperiences()
+    loadAchievements()
 
     return () => {
       isMounted = false
@@ -69,7 +66,7 @@ export function useExperiences() {
   }, [reloadKey])
 
   return {
-    experiences,
+    achievements,
     isLoading,
     error,
     refetch,

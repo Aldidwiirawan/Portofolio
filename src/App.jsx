@@ -13,6 +13,10 @@ const AdminExperiencesPage = lazy(() => import('./pages/admin/AdminExperiencesPa
 const AdminEducationsPage = lazy(() => import('./pages/admin/AdminEducationsPage'))
 const AdminProfilePage = lazy(() => import('./pages/admin/AdminProfilePage'))
 const AdminMessagesPage = lazy(() => import('./pages/admin/AdminMessagesPage'))
+const AdminCertificationsPage = lazy(() => import('./pages/admin/AdminCertificationsPage'))
+const AdminAchievementsPage = lazy(() => import('./pages/admin/AdminAchievementsPage'))
+const AdminLanguagesPage = lazy(() => import('./pages/admin/AdminLanguagesPage'))
+const AdminOrganizationsPage = lazy(() => import('./pages/admin/AdminOrganizationsPage'))
 
 function PageFallback() {
   return (
@@ -103,6 +107,46 @@ function App() {
             element={
               <AdminRoute>
                 <AdminMessagesPage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Protected Admin Certifications Module Route */}
+          <Route
+            path="/admin/certifications"
+            element={
+              <AdminRoute>
+                <AdminCertificationsPage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Protected Admin Achievements Module Route */}
+          <Route
+            path="/admin/achievements"
+            element={
+              <AdminRoute>
+                <AdminAchievementsPage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Protected Admin Languages Module Route */}
+          <Route
+            path="/admin/languages"
+            element={
+              <AdminRoute>
+                <AdminLanguagesPage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Protected Admin Organizations Module Route */}
+          <Route
+            path="/admin/organizations"
+            element={
+              <AdminRoute>
+                <AdminOrganizationsPage />
               </AdminRoute>
             }
           />

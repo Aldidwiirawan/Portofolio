@@ -2,19 +2,18 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
 /**
- * Custom Hook: useExperiences
- * Provides read access for public.experiences table.
- * Encapsulates data fetching, loading state, error handling, and refetch capabilities.
+ * Custom Hook: useCertifications
+ * Provides read access for public.certifications table.
  *
  * @returns {{
- *   experiences: Array<Object>,
+ *   certifications: Array<Object>,
  *   isLoading: boolean,
  *   error: string | null,
  *   refetch: () => void
  * }}
  */
-export function useExperiences() {
-  const [experiences, setExperiences] = useState([])
+export function useCertifications() {
+  const [certifications, setCertifications] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
@@ -28,31 +27,29 @@ export function useExperiences() {
   useEffect(() => {
     let isMounted = true
 
-    async function loadExperiences() {
+    async function loadCertifications() {
       try {
         const { data, error: queryError } = await supabase
-          .from('experiences')
-          .select(
-            'id, company, role, location, start_date, end_date, is_current, description, sort_order, experience_type, created_at'
-          )
-          .order('sort_order', { ascending: true, nullsFirst: false })
-          .order('start_date', { ascending: false })
+          .from('certifications')
+          .select('id, name, issuer, issue_date, credential_url, created_at')
+          .order('issue_date', { ascending: false, nullsLast: true })
+          .order('created_at', { ascending: false })
 
         if (!isMounted) return
 
         if (queryError) {
-          throw new Error(queryError.message || 'Gagal memuat data experiences dari database.')
+          throw new Error(queryError.message || 'Gagal memuat data sertifikasi dari database.')
         }
 
-        setExperiences(data ?? [])
+        setCertifications(data ?? [])
       } catch (err) {
         if (isMounted) {
           setError(
             err instanceof Error
               ? err.message
-              : 'Terjadi kesalahan sistem saat mengambil data experiences.'
+              : 'Terjadi kesalahan sistem saat mengambil data sertifikasi.'
           )
-          setExperiences([])
+          setCertifications([])
         }
       } finally {
         if (isMounted) {
@@ -61,7 +58,7 @@ export function useExperiences() {
       }
     }
 
-    loadExperiences()
+    loadCertifications()
 
     return () => {
       isMounted = false
@@ -69,7 +66,7 @@ export function useExperiences() {
   }, [reloadKey])
 
   return {
-    experiences,
+    certifications,
     isLoading,
     error,
     refetch,

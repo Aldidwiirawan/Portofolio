@@ -120,10 +120,11 @@ c:\Users\acer\portofolio\
 ├── vite.config.js
 ├── supabase/
 │   └── migrations/
-│       └── 20260928000000_storage_portfolio_assets.sql # Migration bucket & Storage RLS
+│       ├── 20260928000000_storage_portfolio_assets.sql # Migration bucket & Storage RLS
+│       └── 20261008000000_cv_builder_extensions.sql    # Migration CV Builder schemas & RLS
 └── src/
     ├── main.jsx                 # React root entry point
-    ├── App.jsx                  # Router setup (Public + Admin lazy routes)
+    ├── App.jsx                  # Router setup (Public + 10 Admin lazy routes)
     ├── App.css                  # App styles
     ├── index.css                # Design system & CSS Variables
     ├── lib/
@@ -133,42 +134,56 @@ c:\Users\acer\portofolio\
     ├── hooks/
     │   ├── useProjects.js       # Hook READ data public.projects
     │   ├── useSkills.js         # Hook READ data public.skills
-    │   ├── useExperiences.js    # Hook READ data public.experiences
+    │   ├── useExperiences.js    # Hook READ data public.experiences (+ experience_type)
     │   ├── useEducations.js     # Hook READ data public.educations
-    │   ├── useProfile.js        # Hook READ & UPDATE data public.profiles
-    │   └── useMessages.js       # Hook READ, TOGGLE READ & DELETE data public.messages
+    │   ├── useProfile.js        # Hook READ & UPDATE data public.profiles (+ phone, address, hobbies, resume)
+    │   ├── useMessages.js       # Hook READ, TOGGLE READ & DELETE data public.messages
+    │   ├── useCertifications.js # Hook READ data public.certifications
+    │   ├── useAchievements.js   # Hook READ data public.achievements
+    │   ├── useLanguages.js      # Hook READ data public.languages
+    │   └── useOrganizations.js  # Hook READ data public.organizations
     ├── data/
-    │   └── portfolioData.js     # Data portofolio statis bawaan (fallback)
+    │   └── portfolioData.js     # Data portofolio statis bawaan (fallback lengkap)
     ├── components/
     │   ├── Navbar.jsx / .css
     │   ├── HeroSection.jsx / .css
-    │   ├── AboutSection.jsx / .css
+    │   ├── AboutSection.jsx / .css        # Bio, phone, address, resume link, hobbies, languages
     │   ├── SkillsSection.jsx / .css
     │   ├── ProjectsSection.jsx / .css
-    │   ├── ExperienceSection.jsx / .css
+    │   ├── ExperienceSection.jsx / .css   # Timeline dengan badge tipe pengalaman
     │   ├── EducationSection.jsx / .css
+    │   ├── CertificationsSection.jsx / .css # Lisensi sertifikasi & prestasi
+    │   ├── OrganizationsSection.jsx / .css  # Pengalaman organisasi & komunitas
     │   ├── ContactSection.jsx / .css
-    │   ├── ContactForm.jsx / .css   # Form pesan publik tersambung ke public.messages
+    │   ├── ContactForm.jsx / .css
     │   ├── Footer.jsx / .css
     │   ├── TechBadge.jsx / .css
     │   ├── SectionTitle.jsx
     │   └── admin/
-    │       ├── AdminRoute.jsx           # Guard autentikasi & verifikasi admin
-    │       ├── ProjectForm.jsx / .css   # Shared form CREATE & UPDATE + Storage Upload
-    │       ├── SkillForm.jsx / .css     # Form CREATE & UPDATE Skills
-    │       ├── ExperienceForm.jsx / .css# Form CREATE & UPDATE Experiences
-    │       └── EducationForm.jsx / .css # Form CREATE & UPDATE Educations
+    │       ├── AdminRoute.jsx              # Guard autentikasi & verifikasi admin
+    │       ├── ProjectForm.jsx / .css      # Shared form CREATE & UPDATE + Storage Upload
+    │       ├── SkillForm.jsx / .css        # Form CREATE & UPDATE Skills
+    │       ├── ExperienceForm.jsx / .css   # Form CREATE & UPDATE Experiences (+ experience_type pills)
+    │       ├── EducationForm.jsx / .css    # Form CREATE & UPDATE Educations
+    │       ├── CertificationForm.jsx / .css# Form CREATE & UPDATE Certifications
+    │       ├── AchievementForm.jsx / .css  # Form CREATE & UPDATE Achievements
+    │       ├── LanguageForm.jsx / .css     # Form CREATE & UPDATE Languages
+    │       └── OrganizationForm.jsx / .css # Form CREATE & UPDATE Organizations
     └── pages/
-        ├── PublicPortfolioPage.jsx      # Halaman utama portofolio publik terintegrasi penuh
+        ├── PublicPortfolioPage.jsx         # Halaman utama portofolio publik terintegrasi penuh
         └── admin/
-            ├── AdminLoginPage.jsx / .css       # Halaman login admin
-            ├── AdminDashboardPage.jsx / .css   # Dashboard ringkasan 6 modul CMS
-            ├── AdminProjectsPage.jsx / .css    # Manajemen proyek (Full CRUD + Storage)
-            ├── AdminSkillsPage.jsx / .css      # Manajemen keahlian (Full CRUD + Filter)
-            ├── AdminExperiencesPage.jsx / .css # Manajemen pengalaman (Full CRUD + Timeline)
-            ├── AdminEducationsPage.jsx / .css  # Manajemen pendidikan (Full CRUD + Timeline)
-            ├── AdminProfilePage.jsx / .css     # Manajemen profil & preview interaktif
-            └── AdminMessagesPage.jsx / .css    # Manajemen inbox pesan (Filter, Detail, Read/Unread, Delete)
+            ├── AdminLoginPage.jsx / .css          # Halaman login admin
+            ├── AdminDashboardPage.jsx / .css      # Dashboard ringkasan 10 modul CMS
+            ├── AdminProjectsPage.jsx / .css       # Manajemen proyek (Full CRUD + Storage)
+            ├── AdminSkillsPage.jsx / .css         # Manajemen keahlian (Full CRUD + Filter)
+            ├── AdminExperiencesPage.jsx / .css    # Manajemen pengalaman (Full CRUD + Type badge)
+            ├── AdminEducationsPage.jsx / .css     # Manajemen pendidikan (Full CRUD + Timeline)
+            ├── AdminProfilePage.jsx / .css        # Manajemen profil lengkap (+ No HP, Alamat, Hobi, Resume)
+            ├── AdminMessagesPage.jsx / .css       # Manajemen inbox pesan (Filter, Read/Unread, Delete)
+            ├── AdminCertificationsPage.jsx / .css # Manajemen sertifikasi (Full CRUD + Link Kredensial)
+            ├── AdminAchievementsPage.jsx / .css   # Manajemen pencapaian & prestasi (Full CRUD)
+            ├── AdminLanguagesPage.jsx / .css      # Manajemen kemampuan bahasa (Full CRUD)
+            └── AdminOrganizationsPage.jsx / .css  # Manajemen pengalaman organisasi (Full CRUD)
 ```
 
 ---
@@ -179,63 +194,48 @@ c:\Users\acer\portofolio\
    - Sumber otorisasi utama selalu berasal dari **Database RLS** dan **Storage RLS** menggunakan `(select private.is_admin())`.
    - Tidak pernah mengekspos `service_role` key di frontend.
    - Tidak menggunakan password rahasia hardcoded di client.
-2. **Tidak Mengubah Tanpa Izin**:
-   - Jangan mengubah skema tabel `public.projects` atau skema tabel lain kecuali diminta.
-   - Jangan mengubah helper database `private.is_admin()`.
-   - Jangan mengubah konfigurasi `.env.local`.
-3. **Kualitas Kode**:
+2. **Kualitas Kode**:
    - Selalu lolos `npm run lint` (`oxlint`) dengan 0 warnings dan 0 errors.
    - Selalu lolos `npm run build` (`vite build`) sebelum task dianggap selesai.
    - Menghindari memory leak dengan selalu membersihkan object URL via `URL.revokeObjectURL()`.
 
 ---
 
-## 7. Status Pekerjaan (Roadmap 1 - 5 Selesai 100%)
+## 7. Status Pekerjaan (Roadmap Awal & CV Builder Selesai 100%)
 
-Seluruh 5 tahap roadmap admin CMS yang direncanakan telah selesai dibangun dan teruji:
+### A. 6 Modul Fondasi Utama:
+- [x] **Fondasi & Projects CMS** (`public.projects`): Full CRUD + Storage upload & automatic orphan cleanup.
+- [x] **Skills CMS** (`public.skills`): Full CRUD + Kategori pills + Filter + Public UI sync.
+- [x] **Experiences CMS** (`public.experiences`): Full CRUD + Date picker + Current status + Public UI sync.
+- [x] **Educations CMS** (`public.educations`): Full CRUD + Degree presets + Public UI sync.
+- [x] **Profile CMS** (`public.profiles`): Full settings + Live preview + Availability toggle + Public UI sync.
+- [x] **Messages CMS** (`public.messages`): Inbox filter + Read/unread toggle + Delete + ContactForm sync.
 
-- [x] **Fondasi & Projects CMS (Stage 0):**
-  - Desain sistem & Layout portofolio publik.
-  - Autentikasi admin 2 lapis (`AdminRoute`).
-  - Full CRUD Projects (`public.projects`) + Supabase Storage upload thumbnail & automatic cleanup.
-- [x] **Tahap 1 — Skills CMS (`public.skills`) Selesai 100%:**
-  - Read & Filter by Category (`useSkills` hook).
-  - Create & Edit (`SkillForm.jsx` dengan preset kategori & proficiency).
-  - Delete dengan Custom Confirmation Modal.
-  - Route `/admin/skills` terproteksi `AdminRoute`.
-  - Sinkronisasi dinamis ke Public Portfolio (`SkillsSection.jsx`) dengan fallback.
-- [x] **Tahap 2 — Experiences CMS (`public.experiences`) Selesai 100%:**
-  - Read & Timeline view (`useExperiences` hook).
-  - Create & Edit (`ExperienceForm.jsx` dengan date picker, role, company, location, is_current).
-  - Delete dengan Custom Confirmation Modal.
-  - Route `/admin/experiences` terproteksi `AdminRoute`.
-  - Sinkronisasi dinamis ke Public Portfolio (`ExperienceSection.jsx`) dengan fallback.
-- [x] **Tahap 3 — Educations CMS (`public.educations`) Selesai 100%:**
-  - Read & Timeline view (`useEducations` hook).
-  - Create & Edit (`EducationForm.jsx` dengan degree preset, start_year, end_year, is_current).
-  - Delete dengan Custom Confirmation Modal.
-  - Route `/admin/educations` terproteksi `AdminRoute`.
-  - Sinkronisasi dinamis ke Public Portfolio (`EducationSection.jsx`) dengan fallback.
-- [x] **Tahap 4 — Profile CMS (`public.profiles`) Selesai 100%:**
-  - Read profile data (`useProfile` hook).
-  - Update data personal, tagline, biografi, domisili, email, status ketersediaan kerja (`is_available`).
-  - Tautan profil sosial (GitHub, LinkedIn, Instagram, Resume URL).
-  - Live interactive preview panel.
-  - Route `/admin/profile` terproteksi `AdminRoute`.
-  - Sinkronisasi dinamis ke Public Portfolio (Hero, About, Contact, dan Footer) dengan fallback.
-- [x] **Tahap 5 — Messages / Inbox CMS (`public.messages`) Selesai 100%:**
-  - Read messages & unread counter badge (`useMessages` hook).
-  - Filter tabs (Semua, Belum Dibaca, Sudah Dibaca).
-  - Modal detail pesan dengan metadata pengirim lengkap dan aksi cepat balas via email (`mailto`).
-  - Toggle status baca/belum dibaca (`markAsRead` / `markAsUnread`).
-  - Hapus pesan dengan Custom Confirmation Modal.
-  - Route `/admin/messages` terproteksi `AdminRoute`.
-  - Integrasi form publik (`ContactForm.jsx`) langsung mengirim pesan ke tabel `public.messages` dengan feedback status dan penanganan RLS yang aman.
+### B. Ekstensi CV Builder Lanjutan (Tahap 1 - 4):
+- [x] **Tahap 1 — Modifikasi Skema Database**:
+  - `public.profiles`: ditambah kolom `phone_number`, `full_address`, `instagram_url`, `linkedin_url`, `github_url`, `resume_link`, `hobbies` (`TEXT[]`).
+  - `public.experiences`: ditambah kolom `experience_type` ('Kerja', 'Magang', 'PKL') default 'Kerja'.
+- [x] **Tahap 2 — Skema Tabel Baru & RLS Supabase**:
+  - `public.certifications` (RLS: Public SELECT, Admin INSERT/UPDATE/DELETE).
+  - `public.achievements` (RLS: Public SELECT, Admin INSERT/UPDATE/DELETE).
+  - `public.languages` (RLS: Public SELECT, Admin INSERT/UPDATE/DELETE).
+  - `public.organizations` (RLS: Public SELECT, Admin INSERT/UPDATE/DELETE).
+- [x] **Tahap 3 — Custom Hooks & Komponen Admin (CRUD)**:
+  - Hooks: `useCertifications.js`, `useAchievements.js`, `useLanguages.js`, `useOrganizations.js`.
+  - Admin Forms & Pages untuk seluruh 4 modul baru dengan konfirmasi modal hapus.
+  - Form & Page `AdminProfilePage.jsx` mendukung No HP, Alamat, Hobi, dan Link Resume.
+  - Form & Page `AdminExperiencesPage.jsx` mendukung pilihan pill `experience_type` (Kerja/Magang/PKL).
+  - Pendaftaran rute di `App.jsx` terproteksi `AdminRoute` dan penambahan kartu di `AdminDashboardPage.jsx`.
+- [x] **Tahap 4 — Sinkronisasi ke UI Publik**:
+  - `AboutSection.jsx` menampilkan No HP, Alamat, Tombol Download Dokumen CV (PDF), Pill Minat & Hobi, serta Kemampuan Bahasa.
+  - `ExperienceSection.jsx` menampilkan badge jenis pengalaman ('Kerja' / 'Magang' / 'PKL').
+  - `CertificationsSection.jsx` menampilkan daftar sertifikasi dengan link kredensial dan prestasi kompetisi.
+  - `OrganizationsSection.jsx` menampilkan linimasa kepengurusan organisasi dan komunitas.
+  - Navigasi anchor di `Navbar.jsx` diperbarui.
 
 ---
 
 ## 8. Verifikasi Kualitas Terakhir
 
-- **Linter**: `oxlint` &rarr; **0 warnings, 0 errors** pada seluruh 42 files.
-- **Production Build**: `vite build` &rarr; **133 modules transformed, build sukses 100%**.
-- **Komitmen Git**: Seluruh perubahan dari Tahap 1 sampai Tahap 5 dikumpulkan sesuai instruksi untuk di-commit bersamaan.
+- **Linter**: `oxlint` &rarr; **0 warnings, 0 errors** pada seluruh 56 files.
+- **Production Build**: `vite build` &rarr; **156 modules transformed, build sukses 100%**.

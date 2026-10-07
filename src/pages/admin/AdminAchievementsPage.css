@@ -1,0 +1,9 @@
+/* Shared styles with AdminCertificationsPage, specialized rules here if needed */
+.admin-achieve-year-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  background-color: var(--color-accent-light);
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-full);
+}

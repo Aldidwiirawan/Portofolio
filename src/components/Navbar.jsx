@@ -21,6 +21,7 @@ function Navbar() {
     { label: 'Proyek', href: '#projects' },
     { label: 'Pengalaman', href: '#experience' },
     { label: 'Pendidikan', href: '#education' },
+    { label: 'Sertifikasi', href: '#certifications' },
   ]
 
   return (

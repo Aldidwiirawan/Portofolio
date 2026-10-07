@@ -84,6 +84,26 @@ function AdminDashboardPage() {
       description: 'Melihat dan meninjau pesan masuk dari formulir kontak publik.',
       table: 'public.messages',
     },
+    {
+      name: 'Certifications',
+      description: 'Pengelolaan sertifikasi profesional, kursus, lisensi, dan tautan kredensial.',
+      table: 'public.certifications',
+    },
+    {
+      name: 'Achievements',
+      description: 'Pengelolaan prestasi, kejuaraan kompetisi, dan penghargaan yang diraih.',
+      table: 'public.achievements',
+    },
+    {
+      name: 'Languages',
+      description: 'Pengelolaan bahasa komunikasi dan tingkat kemahiran (profisiensi).',
+      table: 'public.languages',
+    },
+    {
+      name: 'Organizations',
+      description: 'Pengelolaan pengalaman organisasi kampus, komunitas IT, dan kepanitiaan.',
+      table: 'public.organizations',
+    },
   ]
 
   return (
@@ -128,7 +148,7 @@ function AdminDashboardPage() {
             <p className="admin-welcome-desc">
               Arsitektur routing terproteksi dan sesi autentikasi Supabase Auth telah aktif. Sesi ini
               dibatasi hanya untuk akun pemilik portfolio terdaftar. Seluruh operasi CRUD untuk
-              modul di bawah akan dihubungkan pada tahap pengembangan berikutnya.
+              modul di bawah terhubung langsung ke database Supabase.
             </p>
           </div>
 
@@ -142,6 +162,10 @@ function AdminDashboardPage() {
                 Experiences: '/admin/experiences',
                 Educations: '/admin/educations',
                 Messages: '/admin/messages',
+                Certifications: '/admin/certifications',
+                Achievements: '/admin/achievements',
+                Languages: '/admin/languages',
+                Organizations: '/admin/organizations',
               }
               const targetPath = routeMap[module.name]
 

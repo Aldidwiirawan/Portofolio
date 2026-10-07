@@ -15,11 +15,15 @@ function ProfileEditor({ profile, onSaveSuccess }) {
     tagline: profile?.tagline || '',
     bio: profile?.bio || '',
     location: profile?.location || '',
+    full_address: profile?.full_address || '',
+    phone_number: profile?.phone_number || '',
     email: profile?.email || '',
     github_url: profile?.github_url || '',
     linkedin_url: profile?.linkedin_url || '',
     instagram_url: profile?.instagram_url || '',
-    resume_url: profile?.resume_url || '',
+    resume_url: profile?.resume_url || profile?.resume_link || '',
+    resume_link: profile?.resume_link || profile?.resume_url || '',
+    hobbies: Array.isArray(profile?.hobbies) ? profile.hobbies.join(', ') : '',
     avatar_url: profile?.avatar_url || '',
     is_available: profile?.is_available ?? true,
   }))
@@ -54,16 +58,29 @@ function ProfileEditor({ profile, onSaveSuccess }) {
     setIsSaving(true)
     setGeneralError(null)
 
+    const hobbiesArray = formData.hobbies
+      ? formData.hobbies
+          .split(',')
+          .map((h) => h.trim())
+          .filter(Boolean)
+      : []
+
+    const resumeLinkVal = formData.resume_url.trim() || formData.resume_link.trim() || null
+
     const payload = {
       full_name: formData.full_name.trim(),
       tagline: formData.tagline.trim() || null,
       bio: formData.bio.trim() || null,
       location: formData.location.trim() || null,
+      full_address: formData.full_address.trim() || null,
+      phone_number: formData.phone_number.trim() || null,
       email: formData.email.trim() || null,
       github_url: formData.github_url.trim() || null,
       linkedin_url: formData.linkedin_url.trim() || null,
       instagram_url: formData.instagram_url.trim() || null,
-      resume_url: formData.resume_url.trim() || null,
+      resume_url: resumeLinkVal,
+      resume_link: resumeLinkVal,
+      hobbies: hobbiesArray,
       avatar_url: formData.avatar_url.trim() || null,
       is_available: Boolean(formData.is_available),
       updated_at: new Date().toISOString(),
@@ -194,6 +211,38 @@ function ProfileEditor({ profile, onSaveSuccess }) {
                 placeholder="kontak@example.com"
               />
             </div>
+
+            <div className="form-group">
+              <label htmlFor="profile-phone" className="form-label">
+                <span>Nomor Telepon / WhatsApp</span>
+              </label>
+              <input
+                id="profile-phone"
+                name="phone_number"
+                type="tel"
+                className="form-control-input"
+                value={formData.phone_number}
+                onChange={handleChange}
+                disabled={isSaving}
+                placeholder="082331318598"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="profile-address" className="form-label">
+                <span>Alamat Lengkap</span>
+              </label>
+              <input
+                id="profile-address"
+                name="full_address"
+                type="text"
+                className="form-control-input"
+                value={formData.full_address}
+                onChange={handleChange}
+                disabled={isSaving}
+                placeholder="Bandar Lor Gg. IX No. 69, Kota Kediri"
+              />
+            </div>
           </div>
 
           <div className="form-group" style={{ marginTop: 'var(--space-4)' }}>
@@ -210,6 +259,25 @@ function ProfileEditor({ profile, onSaveSuccess }) {
               disabled={isSaving}
               placeholder="Ceritakan latar belakang, fokus teknologi, dan visi profesional Anda..."
             />
+          </div>
+
+          <div className="form-group" style={{ marginTop: 'var(--space-4)' }}>
+            <label htmlFor="profile-hobbies" className="form-label">
+              <span>Hobi & Minat (Pisahkan dengan tanda koma)</span>
+            </label>
+            <input
+              id="profile-hobbies"
+              name="hobbies"
+              type="text"
+              className="form-control-input"
+              value={formData.hobbies}
+              onChange={handleChange}
+              disabled={isSaving}
+              placeholder="Contoh: Coding, Jaringan Komputer, Badminton, Membaca Buku"
+            />
+            <p className="form-field-helper">
+              Daftar hobi/minat yang akan disimpan sebagai array data di database.
+            </p>
           </div>
         </div>
 
