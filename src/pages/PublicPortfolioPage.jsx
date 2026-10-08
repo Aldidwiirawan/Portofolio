@@ -1,14 +1,14 @@
+import { useState } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import HeroSection from '../components/HeroSection'
+import ProjectsSection from '../components/ProjectsSection'
 import AboutSection from '../components/AboutSection'
 import SkillsSection from '../components/SkillsSection'
-import ProjectsSection from '../components/ProjectsSection'
-import ExperienceSection from '../components/ExperienceSection'
-import EducationSection from '../components/EducationSection'
-import CertificationsSection from '../components/CertificationsSection'
-import OrganizationsSection from '../components/OrganizationsSection'
+import JourneySection from '../components/JourneySection'
 import ContactSection from '../components/ContactSection'
+import GuestbookDrawer from '../components/GuestbookDrawer'
+import CustomCursor from '../components/CustomCursor'
 
 import { useProfile } from '../hooks/useProfile'
 import { useProjects } from '../hooks/useProjects'
@@ -19,6 +19,7 @@ import { useCertifications } from '../hooks/useCertifications'
 import { useAchievements } from '../hooks/useAchievements'
 import { useLanguages } from '../hooks/useLanguages'
 import { useOrganizations } from '../hooks/useOrganizations'
+import { useGuestbook } from '../hooks/useGuestbook'
 import {
   profileData,
   skillsData,
@@ -30,9 +31,11 @@ import {
 
 /**
  * PublicPortfolioPage Component
- * Renders the public-facing single-page portfolio
+ * Renders the public-facing single-page portfolio with Luxury Tech layout
  */
 function PublicPortfolioPage() {
+  const [isGuestbookOpen, setIsGuestbookOpen] = useState(false)
+
   const { profile: dbProfile } = useProfile()
   const { projects: dbProjects } = useProjects()
   const { skills: dbSkills } = useSkills()
@@ -42,6 +45,7 @@ function PublicPortfolioPage() {
   const { achievements: dbAchievements } = useAchievements()
   const { languages: dbLanguages } = useLanguages()
   const { organizations: dbOrganizations } = useOrganizations()
+  const { entries: guestbookEntries, totalCount: guestbookCount, addEntry: addGuestbookEntry } = useGuestbook()
 
   const profile = dbProfile
     ? {
@@ -93,44 +97,67 @@ function PublicPortfolioPage() {
 
   return (
     <div className="portfolio-app">
-      {/* 1. Sticky Navigation Header */}
-      <Navbar />
+      {/* 0. Custom Animated Tech Cursor (Desktop Only) */}
+      <CustomCursor />
 
-      {/* 2. Main Content Sections */}
+      {/* 1. Modern Header */}
+      <Navbar
+        onOpenGuestbook={() => setIsGuestbookOpen(true)}
+        guestbookCount={guestbookCount}
+      />
+
+      {/* 2. Main Content Streamlined Hierarchy */}
       <main className="portfolio-main">
-        {/* Hero Section */}
+        {/* Hero Section — Blueprint grid, giant statement, 3D card */}
         <HeroSection profile={profile} />
 
-        {/* About Section */}
-        <AboutSection profile={profile} languages={languages} />
-
-        {/* Skills Section */}
-        <SkillsSection skills={skills} />
-
-        {/* Projects Section */}
+        {/* Projects Section — Elevated for recruiters */}
         <ProjectsSection projects={projects} />
 
-        {/* Experience Section */}
-        <ExperienceSection experiences={experiences} />
+        {/* About Section — Biography, Languages & Hobbies */}
+        <AboutSection profile={profile} languages={languages} />
 
-        {/* Education Section */}
-        <EducationSection educations={educations} />
+        {/* Skills Section — Frontend, Backend, Tools */}
+        <SkillsSection skills={skills} />
 
-        {/* Certifications & Achievements Section */}
-        <CertificationsSection
+        {/* Journey Section — Unified interactive tabs */}
+        <JourneySection
+          experiences={experiences}
+          educations={educations}
           certifications={certifications}
           achievements={achievements}
+          organizations={organizations}
         />
 
-        {/* Organizations & Community Section */}
-        <OrganizationsSection organizations={organizations} />
-
-        {/* Contact Section */}
+        {/* Contact Section — Direct contact form */}
         <ContactSection profile={profile} />
       </main>
 
-      {/* 3. Footer with subtle admin discovery link */}
+      {/* 3. Footer */}
       <Footer profile={profile} />
+
+      {/* 4. Slide-over Drawer Guestbook */}
+      <GuestbookDrawer
+        isOpen={isGuestbookOpen}
+        onClose={() => setIsGuestbookOpen(false)}
+        entries={guestbookEntries}
+        onAddEntry={addGuestbookEntry}
+        totalCount={guestbookCount}
+      />
+
+      {/* 5. Floating Bottom-Right Guestbook Trigger Pill (Styfen Style) */}
+      {!isGuestbookOpen && (
+        <button
+          type="button"
+          className="guestbook-floating-trigger"
+          onClick={() => setIsGuestbookOpen(true)}
+          title="Buka Buku Tamu (Guestbook)"
+          aria-label="Buka Buku Tamu"
+        >
+          <span>💬 Guestbook</span>
+          <span className="guestbook-floating-badge">{guestbookCount}</span>
+        </button>
+      )}
     </div>
   )
 }

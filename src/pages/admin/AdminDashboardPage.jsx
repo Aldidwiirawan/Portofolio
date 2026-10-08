@@ -104,6 +104,11 @@ function AdminDashboardPage() {
       description: 'Pengelolaan pengalaman organisasi kampus, komunitas IT, dan kepanitiaan.',
       table: 'public.organizations',
     },
+    {
+      name: 'Guestbook',
+      description: 'Pengelolaan buku tamu publik dan memberikan balasan resmi [DEV ALDI].',
+      table: 'public.guestbooks',
+    },
   ]
 
   return (
@@ -166,6 +171,7 @@ function AdminDashboardPage() {
                 Achievements: '/admin/achievements',
                 Languages: '/admin/languages',
                 Organizations: '/admin/organizations',
+                Guestbook: '/admin/guestbook',
               }
               const targetPath = routeMap[module.name]
 

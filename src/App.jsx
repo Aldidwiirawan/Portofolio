@@ -17,6 +17,7 @@ const AdminCertificationsPage = lazy(() => import('./pages/admin/AdminCertificat
 const AdminAchievementsPage = lazy(() => import('./pages/admin/AdminAchievementsPage'))
 const AdminLanguagesPage = lazy(() => import('./pages/admin/AdminLanguagesPage'))
 const AdminOrganizationsPage = lazy(() => import('./pages/admin/AdminOrganizationsPage'))
+const AdminGuestbookPage = lazy(() => import('./pages/admin/AdminGuestbookPage'))
 
 function PageFallback() {
   return (
@@ -147,6 +148,16 @@ function App() {
             element={
               <AdminRoute>
                 <AdminOrganizationsPage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Protected Admin Guestbook Module Route */}
+          <Route
+            path="/admin/guestbook"
+            element={
+              <AdminRoute>
+                <AdminGuestbookPage />
               </AdminRoute>
             }
           />

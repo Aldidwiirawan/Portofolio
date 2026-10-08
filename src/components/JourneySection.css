@@ -1,0 +1,111 @@
+/* ==========================================================================
+   JOURNEY SECTION — INTERACTIVE LUXURY TECH TABS
+   ========================================================================== */
+
+.journey-section {
+  position: relative;
+  padding-block: var(--space-16);
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(15, 23, 42, 0.7) 0%,
+    rgba(10, 13, 20, 1) 100%
+  );
+}
+
+/* Tabs Navigation Container */
+.journey-tabs-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-10);
+  padding-inline: var(--space-4);
+}
+
+.journey-tabs-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.35rem;
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Tab Button */
+.journey-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.journey-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.journey-tab-btn.is-active {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.7) 0%, rgba(6, 182, 212, 0.7) 100%);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 4px 18px rgba(6, 182, 212, 0.25);
+}
+
+.journey-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--color-accent);
+}
+
+.journey-tab-btn.is-active .journey-tab-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* Tab Content Panel */
+.journey-tab-panel {
+  animation: tabFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Empty State inside tab */
+.journey-empty-state {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  background: rgba(17, 24, 39, 0.3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+  margin-inline: auto;
+}
